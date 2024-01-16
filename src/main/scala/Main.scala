@@ -61,7 +61,6 @@ def printForContent(data: String, generator: String, content: String, writer: Pr
         generatorList match
           case None => return
           case Some(list) => 
-            println(list)
             for e <- list do
               writer.print(content)
 
