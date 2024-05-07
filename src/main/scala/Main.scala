@@ -9,6 +9,7 @@ import io.circe.Encoder.AsObject.importedAsObjectEncoder
 import io.circe.Encoder.LowPriorityAsObjectEncoders
 
 @main def main: Unit =
+  println(lex("hallo"))
   val path: os.Path = os.pwd/"test.html"
 
   val content: String = os.read(path)
