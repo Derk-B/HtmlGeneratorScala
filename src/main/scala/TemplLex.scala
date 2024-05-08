@@ -26,20 +26,21 @@ def lex(): Unit =
 // Lexer function
 // --------------
 
-def lex_brackets_open(file: String): LexData =
-    val result = lex_char(file, '{')
-    return (tBracketOpen, result._2)
+def lex_brackets_open(data: LexData): LexData =
+    val result = lex_char(data, '{')
+    return (replace_token(result, BracketOpen))
 
-def lex_brackets_close(file: String): LexData =
-    val result = lex_char(file, '}')
-    return (tBracketClose, result._2)
+def lex_brackets_close(data: LexData): LexData =
+    val result = lex_char(data, '}')
+    return (replace_token(result, tBracketClose))
 
-def lex_for(file: String): LexData = 
-    val result = lex_str(file, "for")
-    return (tForSign, result._2)
+def lex_for(data: LexData): LexData = 
+    val result = lex_str(data, "for")
+    return (replace_token(result, tForSign))
 
 @throws(classOf[LexException])
-def lex_char(file: String, c: Char): LexData =
+def lex_char(data: LexData, c: Char): LexData =
+    val file = data._2
 
     if (file.length() == 0)
         throw LexException("No file left to parse")
@@ -47,35 +48,42 @@ def lex_char(file: String, c: Char): LexData =
     if (file(0) != c)
         throw LexException(s"Incorrect char, excpected ${c}, but got ${file(0)}")
 
-    return (tChar(file(0)), file.drop(1))
+    return (data._1 :+ tChar(file(0)), file.drop(1))
 
 @throws(classOf[LexException])
-def lex_whitespace(file: String): LexData = 
-    return lex_char(file, ' ')
+def lex_whitespace(data: LexData): LexData = 
+    return lex_char(data, ' ')
 
 @throws(classOf[LexException])
-def lex_str(file: String, str: String): LexData =
-    var res = lex_char(file, str(0))
+def lex_str(data: LexData, str: String): LexData =
+    var res = lex_char(data, str(0))
 
-    for (c <- str.drop(1))
-        res = lex_char(res._2, c)
-    
+    for (c <- str.drop(1)) {
+        res = lex_char(res, c)
+    }
+
     return (tString(str), res._2)
 
 // ---------------
 // Abstract lexers
 // ---------------
 
+def replace_token(data: LexData, t: token) : LexData = 
+    tokens = data._2
+
+    return (tokens.pop(1) :+ t, data._1)
+
 @throws(classOf[LexException])
-def lex_any(file: String) : LexData = 
+def lex_any(data: LexData) : LexData = 
+    val file = data._2    
     if (file.length() == 0)
         throw LexException("No file left to parse")
 
-    return (tChar(file(0)), file.drop(1))
+    return (data._1 :+ tChar(file(0)), file.drop(1))
 
 // Requires at least one token to be parsed correctly
-def lex_some(file: String, callback: (String) => LexData): LexData =
-    var lex_result: LexData = lex_many(file, callback)
+def lex_some(data: LexData, callback: (String) => LexData): LexData =
+    var lex_result: LexData = lex_many(data, callback)
 
     val token: tMany = lex_result._1 match
         case tMany(value) => tMany(value)
@@ -88,7 +96,7 @@ def lex_some(file: String, callback: (String) => LexData): LexData =
 
 // Expects zero, one or more tokens to be parsed
 @throws(classOf[Throwable])
-def lex_many(file: String, callback: (String) => LexData): (tMany, String) =
+def lex_many(file: LexData, callback: (String) => LexData): (tMany, String) =
     var newFile: String = file
     var tokens: List[token] = List.empty[token]
     var continue_parsing = true
