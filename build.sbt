@@ -13,6 +13,7 @@ lazy val root = project
     libraryDependencies += "org.scala-lang" %% "toolkit" % "0.1.7",
     libraryDependencies += "io.circe" %% "circe-core" % "0.14.6",
     libraryDependencies += "io.circe" %% "circe-generic" % "0.14.6",
-    libraryDependencies += "io.circe" %% "circe-parser" % "0.14.6"
+    libraryDependencies += "io.circe" %% "circe-parser" % "0.14.6",
+    libraryDependencies += "commons-logging" % "commons-logging" % "1.3.1"
 
   )
